@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Jaguar POS</title><meta name="theme-color" content="#0b0807">
+<style>
+:root{--bg:#0b0807;--bg2:#120d0b;--p:#17110f;--p2:#201815;--p3:#2a201b;--t:#f7efe8;--m:#a8978a;--m2:#7a6b61;--o:#ff6b1f;--o2:#ff9a3d;--g:#35d07f;--r:#ff5c5c;--l:#2d221c;--l2:#3d2e26;--gl:linear-gradient(135deg,#ff6b1f,#ff9a3d);--sh:0 10px 30px -12px #000c}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:radial-gradient(1200px 600px at 10% -10%,#2a140a55,transparent 60%),var(--bg);color:var(--t);font:15px/1.4 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--p2);border:1px solid var(--l);border-radius:14px;padding:10px 14px;min-height:48px;cursor:pointer;font-weight:600;transition:transform .12s,background .15s,border-color .15s,box-shadow .15s}
+button:hover{border-color:var(--l2);background:var(--p3)}button:active{transform:scale(.97)}
+button.pri{background:var(--gl);color:#1b0c03;font-weight:700;border:0;box-shadow:0 8px 20px -8px #ff6b1fa0}button.pri:hover{filter:brightness(1.06)}
+button.ok{background:linear-gradient(135deg,#2bc473,#47e096);color:#04210f;font-weight:700;border:0;box-shadow:0 8px 20px -8px #35d07f88}
+button.ghost{background:transparent}button:disabled{opacity:.35;pointer-events:none;box-shadow:none}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--o);outline-offset:2px}
+input,select,textarea{width:100%;background:var(--bg2);border:1px solid var(--l);border-radius:12px;padding:11px 14px;min-height:46px;transition:border-color .15s,box-shadow .15s}
+input::placeholder{color:var(--m2)}input:focus,select:focus{border-color:var(--o);box-shadow:0 0 0 3px #ff6b1f22;outline:0}
+label{display:block;color:var(--m);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin:14px 0 6px}
+#app{height:100%}.err{color:var(--r);min-height:22px;margin:8px 0;font-size:14px}
+/* marca */
+.brand{display:flex;align-items:center;gap:10px}.logo{width:36px;height:36px;border-radius:11px;background:var(--gl);display:grid;place-items:center;box-shadow:0 6px 18px -6px #ff6b1faa}
+.logo svg{width:20px;height:20px;fill:#1b0c03}.brand b{font-size:16px;letter-spacing:-.01em}.brand small{display:block;color:var(--m);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+/* login / caja */
+.auth{min-height:100%;display:grid;place-items:center;padding:20px}
+.c{width:100%;max-width:400px;background:linear-gradient(180deg,var(--p),var(--bg2));border:1px solid var(--l);border-radius:24px;padding:28px;box-shadow:var(--sh)}
+.c h2{margin:18px 0 4px;font-size:22px;letter-spacing:-.02em}.c .sub{color:var(--m);margin:0 0 6px;font-size:14px}
+/* layout */
+.shell{display:grid;grid-template-columns:1fr 400px;height:100%;gap:0}
+.main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.top{display:flex;gap:10px;padding:14px 18px;align-items:center;border-bottom:1px solid var(--l);background:#0e0a09cc;backdrop-filter:blur(10px)}.top .sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:var(--p);border:1px solid var(--l);font-size:12.5px;color:var(--m);font-weight:600;white-space:nowrap}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--g);box-shadow:0 0 0 3px #35d07f33}
+.top button{min-height:40px;padding:7px 14px;border-radius:12px;font-size:14px}
+.tools{display:flex;gap:12px;padding:14px 18px 4px;align-items:center;flex-wrap:wrap}
+.search{position:relative;flex:1;min-width:200px}.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--m2);fill:none;stroke-width:2}
+.search input{padding-left:42px;border-radius:14px;background:var(--p)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 18px 12px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chips button{white-space:nowrap;min-height:40px;padding:6px 16px;border-radius:999px;background:var(--p);font-size:14px;color:var(--m)}
+.chips .on{background:var(--gl);color:#1b0c03;border:0;box-shadow:0 6px 16px -6px #ff6b1f99}
+.grid{flex:1;overflow:auto;padding:4px 18px 22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:12px;align-content:start}
+.it{position:relative;background:linear-gradient(180deg,var(--p2),var(--p));border:1px solid var(--l);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:132px;overflow:hidden;transition:transform .12s,border-color .15s,box-shadow .15s}
+.it::before{content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:hsl(var(--h,22) 90% 58%);opacity:.9}
+.it.tap{cursor:pointer}.it.tap:hover{border-color:var(--l2);transform:translateY(-2px);box-shadow:var(--sh)}.it.tap:active{transform:scale(.97)}
+.it .cl{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:hsl(var(--h,22) 80% 68%);font-weight:700}
+.it h4{margin:0;font-size:15.5px;font-weight:650;line-height:1.25;letter-spacing:-.01em;flex:1}
+.it .pr{display:flex;align-items:center;justify-content:space-between;font-size:17px;font-weight:750}
+.it .plus{width:34px;height:34px;border-radius:11px;background:var(--gl);display:grid;place-items:center;color:#1b0c03;font-size:20px;font-weight:800;line-height:1}
+.it .vs{display:flex;flex-direction:column;gap:6px}.it .vs button{display:flex;justify-content:space-between;min-height:40px;padding:8px 12px;border-radius:11px;font-size:13.5px}.it .vs button b{color:var(--o2)}
+.it .xb{min-height:34px;padding:6px 10px;border-radius:10px;font-size:12.5px;align-self:flex-start}.it.ag{opacity:.45}.it .tag{align-self:flex-start;background:#ff5c5c22;color:var(--r);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+.empty{grid-column:1/-1;text-align:center;color:var(--m);padding:40px 0}
+/* carrito */
+.cart{display:flex;flex-direction:column;background:linear-gradient(180deg,var(--p),var(--bg2));min-height:0;border-left:1px solid var(--l)}
+.cart .hd{padding:16px 18px 12px;display:flex;align-items:center;justify-content:space-between}.cart .hd h3{margin:0;font-size:17px;letter-spacing:-.01em}.cart .hd span{color:var(--m);font-size:13px}
+.cart .body{flex:1;overflow:auto;padding:0 18px 10px}
+.seg{display:flex;gap:4px;background:var(--bg);border:1px solid var(--l);border-radius:14px;padding:4px}.seg button{flex:1;min-height:40px;border:0;background:transparent;border-radius:10px;font-size:13.5px;color:var(--m)}
+.seg .on{background:var(--p3);color:var(--t);box-shadow:0 2px 8px #0008,inset 0 0 0 1px var(--l2)}
+#dom input{margin-top:8px}
+.ln{display:flex;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--l)}.ln .nm{flex:1;min-width:0;font-size:14px;line-height:1.3}.ln .nm small{color:var(--m)}
+.ln .tt{font-weight:700;min-width:70px;text-align:right}
+.stp{display:flex;align-items:center;gap:2px;background:var(--bg);border:1px solid var(--l);border-radius:12px}.stp button{min-height:34px;width:34px;padding:0;border:0;background:transparent;font-size:18px;border-radius:10px}.stp b{min-width:22px;text-align:center}
+.emp{color:var(--m);text-align:center;padding:36px 10px;border:1px dashed var(--l2);border-radius:16px;margin-top:14px}
+.tot{padding:14px 18px 18px;border-top:1px solid var(--l);background:#0c0807}.tot>div{display:flex;justify-content:space-between;align-items:center;margin:5px 0;color:var(--m);font-size:14px}
+.tot .big{font-size:26px;font-weight:800;color:var(--t);letter-spacing:-.02em;margin:10px 0 12px}.tot input{min-height:38px;padding:6px 10px}
+.row{display:flex;gap:8px;margin:8px 0}.row>*{flex:1}.row .s{flex:0 0 52px}
+/* modal */
+.md{position:fixed;inset:0;background:#000b;backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:14px;z-index:5;animation:fi .15s}
+.md>div{background:linear-gradient(180deg,var(--p2),var(--p));border:1px solid var(--l2);border-radius:22px;padding:22px;width:100%;max-width:480px;max-height:94vh;overflow:auto;box-shadow:0 30px 80px -20px #000;animation:up .2s}
+.md h3{margin:0 0 12px;font-size:20px;letter-spacing:-.02em}.md h4{margin:18px 0 8px;font-size:12px;color:var(--m);text-transform:uppercase;letter-spacing:.08em}
+.md select,.md button[data-all]{text-transform:capitalize}
+.sum{background:var(--bg);border:1px solid var(--l);border-radius:14px;padding:4px 14px;margin:8px 0}.sum div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--l);font-size:14px}.sum div:last-child{border:0}
+.bdg:not(:empty){display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--o);color:#1b0c03;font-size:12px;line-height:20px;text-align:center}.pw{border:1px solid var(--l);border-radius:14px;padding:12px;margin:10px 0;background:var(--bg)}.pw h4{margin:0 0 4px;font-size:15px;text-transform:none;letter-spacing:0;color:var(--t)}.pw small{color:var(--m)}.pw ul{margin:8px 0;padding-left:18px;font-size:13.5px}@keyframes fi{from{opacity:0}}@keyframes up{from{opacity:0;transform:translateY(14px) scale(.98)}}
+#rcpt{display:none}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--l2);border-radius:8px}
+@media(max-width:1000px){.shell{grid-template-columns:1fr 340px}}
+@media(max-width:820px){.shell{grid-template-columns:1fr;grid-template-rows:1fr 48%}.cart{border-left:0;border-top:1px solid var(--l2);border-radius:22px 22px 0 0;box-shadow:0 -14px 40px -16px #000}.grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.top .pill.hm{display:none}.brand small{display:none}.brand b{white-space:nowrap}.top{padding:10px 12px}}
+@media print{body>*:not(#rcpt){display:none!important}body{background:#fff}#rcpt{display:block;color:#000;background:#fff;font:13px monospace;width:72mm}#rcpt hr{border:0;border-top:1px dashed #000}#rcpt .r{display:flex;justify-content:space-between}}
+</style></head><body>
+<div id="app"></div><div id="md"></div><div id="rcpt"></div>
+<script>
+const SUPA={url:"https://akaecdfbpsqhqkgafjta.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFrYWVjZGZicHNxaHFrZ2FmanRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwMzQyMTIsImV4cCI6MjEwNzYxMDIxMn0.gTohBD9OgC3rji_MX6lftWetvjuVQ6zCizbR1p_c5Oc"};
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const cop=n=>"$"+Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,".");
+const LOGO='<span class="logo"><svg viewBox="0 0 24 24"><path d="M4 3l4 3h8l4-3 1 7c0 6-3.5 11-9 11S3 16 3 10l1-7zm5 9a1.3 1.3 0 100 2.6A1.3 1.3 0 009 12zm6 0a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6zm-4.2 4l1.2 1.2 1.2-1.2z"/></svg></span>';
+const NOMBRE="Jaguar Burger & Grill";
+let ses=null,MENU=[],DOM=5000,cat="",q="",cart=[],tipo="local",caja=null,admin=false,cli=null,cliRes=[],cliT=null;
+try{ses=JSON.parse(sessionStorage.getItem("pos-ses")||"null")}catch(_){}
+/* ---------- red ---------- */
+async function api(path,opt,tok){
+  let r;try{r=await fetch(SUPA.url+path,Object.assign({},opt,{headers:Object.assign({apikey:SUPA.key,Authorization:"Bearer "+(tok||SUPA.key),"Content-Type":"application/json"},(opt||{}).headers)}))}
+  catch(_){throw new Error("No se pudo conectar. Revisa tu internet y abre esta página desde su enlace en el navegador (Chrome), no desde la vista previa de Claude.")}
+  let j=null;try{j=await r.json()}catch(_){}
+  if(!r.ok)throw new Error((j&&(j.message||j.msg||j.error_description))||"Error "+r.status);return j}
+function setSes(j,email){ses=j?{at:j.access_token,rt:j.refresh_token,exp:Date.now()/1000+(j.expires_in||3600),email:email||(ses&&ses.email)}:null;sessionStorage.setItem("pos-ses",JSON.stringify(ses))}
+async function token(){if(!ses)return null;if(ses.exp-Date.now()/1000>60)return ses.at;
+  try{setSes(await api("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:JSON.stringify({refresh_token:ses.rt})}));return ses.at}catch(_){setSes(null);return null}}
+const rpc=async(n,a)=>api("/rest/v1/rpc/"+n,{method:"POST",body:JSON.stringify(a||{})},await token());
+const get=async p=>api("/rest/v1/"+p,{},await token());
+/* ---------- menú (base + cambios del panel) ---------- */
+async function cargarMenu(){
+  try{const c=(await api("/rest/v1/site_config?id=eq.1&select=config"))[0].config||{};DOM=Number.isInteger((c.negocio||{}).domicilio)?c.negocio.domicilio:5000}catch(_){}
+  const m=await rpc("menu_publico");
+  if(!m||!Array.isArray(m.categorias)||!m.categorias.length)throw new Error("No se pudo cargar el menú.");
+  MENU=m.categorias.map(c=>({id:c.id,n:c.nombre||c.id,items:(c.items||[]).map(i=>({k:i.id,id:i.id,
+    n:(!c.pre||/perro/i.test(i.n))?i.n:c.pre+" "+i.n,p:(i.v&&i.v.length)?null:i.p,
+    v:(i.v&&i.v.length)?i.v.map(x=>[x.n,x.p]):null,g:(i.g||[]).filter(g=>(g.m||[]).length),ag:i.ag===true}))})).filter(c=>c.items.length);
+  if(Array.isArray(m.combos)&&m.combos.length)MENU.unshift({id:"combos",n:"Combos",items:m.combos.map(c=>({k:"combo|"+c.id,id:c.id,combo:true,
+    n:c.n,p:c.p,v:null,g:[],ag:c.ag===true,
+    d:[c.d,(c.items||[]).map(x=>x.cantidad+"x "+x.n+(x.variante?" ("+x.variante+")":"")).join(" + ")].filter(Boolean).join(" · ")}))});
+  cat=MENU[0].id}
+/* ---------- arranque ---------- */
+function login(msg){$("#app").innerHTML=`<div class="auth"><div class="c"><div class="brand">${LOGO}<div><b>Jaguar POS</b><small>Burger &amp; Grill</small></div></div><h2>Bienvenido</h2><p class="sub">Inicia sesión para abrir el mostrador.</p><label>Correo</label><input id="em" type="email" autocomplete="username" placeholder="tu@correo.com"><label>Contraseña</label><input id="pw" type="password" autocomplete="current-password" placeholder="••••••••"><div class="err" id="er">${esc(msg||"")}</div><button class="pri" style="width:100%" id="go">Entrar</button></div></div>`;
+  const go=async()=>{try{const e=$("#em").value.trim();setSes(await api("/auth/v1/token?grant_type=password",{method:"POST",body:JSON.stringify({email:e,password:$("#pw").value})}),e);start()}catch(x){$("#er").textContent=/invalid/i.test(x.message)?"Correo o contraseña incorrectos.":x.message}};
+  $("#go").onclick=go;$("#pw").onkeydown=e=>{if(e.key==="Enter")go()}}
+async function start(){
+  if(!ses)return login();
+  $("#app").innerHTML='<div class="auth"><div class="c" style="text-align:center"><div class="brand" style="justify-content:center">'+LOGO+'<b>Cargando…</b></div></div></div>';
+  try{admin=(await get("admin_users?select=user_id")).length>0;const rl=(await get("user_roles?select=role")).map(x=>x.role);
+    if(!admin&&!rl.includes("cajero")){await salir("Esta cuenta no tiene permiso de cajero.");return}
+    await cargarMenu();caja=await rpc("cash_summary");shell()}catch(x){await salir(x.message)}}
+async function salir(m){try{if(ses)await api("/auth/v1/logout",{method:"POST"},ses.at)}catch(_){}setSes(null);cart=[];login(m)}
+/* ---------- pantalla principal ---------- */
+const ICO_S='<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
+function shell(){
+  if(!caja)return abrirCajaUI();
+  const ab=new Date(caja.abierta).toLocaleTimeString("es-CO",{timeZone:"America/Bogota",hour:"2-digit",minute:"2-digit"});
+  $("#app").innerHTML=`<div class="shell"><div class="main"><div class="top"><div class="brand">${LOGO}<div><b>Jaguar POS</b><small>Burger &amp; Grill</small></div></div><span class="sp"></span><span class="pill hm"><i></i>Caja abierta · ${esc(ab)}</span><span class="pill" id="clk"></span><button id="bped" type="button">Pedidos <b id="bpn" class="bdg"></b></button><a href="cocina.html" style="text-decoration:none"><button type="button">Cocina</button></a><button id="bmenu" class="ghost">Menú</button><button id="bcaja">Caja</button><button class="ghost" id="bsal">Salir</button></div>
+  <div class="tools"><div class="search">${ICO_S}<input id="bq" placeholder="Buscar producto…" type="search"></div></div>
+  <div class="chips" id="chips"></div><div class="grid" id="grid"></div></div>
+  <div class="cart"><div class="hd"><h3>Pedido actual</h3><span id="cnt"></span></div><div class="body"><div class="seg" id="tipos"></div><div id="dom"></div><div id="lines"></div></div><div class="tot" id="tot"></div></div></div>`;
+  $("#bped").onclick=pedidosUI;$("#bmenu").onclick=()=>{if(cart.length&&!confirm("Hay un pedido sin cobrar. ¿Salir al menú y perderlo?"))return;location.href="admin.html"};$("#bcaja").onclick=cajaUI;$("#bsal").onclick=()=>salir();$("#bq").oninput=e=>{q=e.target.value.trim().toLowerCase();drawMenu()};
+  const tick=()=>{const c=$("#clk");if(c)c.textContent=new Date().toLocaleTimeString("es-CO",{timeZone:"America/Bogota",hour:"2-digit",minute:"2-digit"});else clearInterval(tk)};tick();const tk=setInterval(tick,15000);
+  drawMenu();drawCart();pollPedidos()}
+function drawMenu(){
+  $("#chips").innerHTML=MENU.map(c=>`<button data-c="${c.id}" class="${!q&&c.id===cat?"on":""}">${esc(c.n)}</button>`).join("");
+  $("#chips").onclick=e=>{const b=e.target.closest("[data-c]");if(b){cat=b.dataset.c;$("#bq").value="";q="";drawMenu()}};
+  const its=MENU.flatMap((c,ci)=>(q||c.id===cat)?c.items.map(i=>({...i,cn:c.n,h:(ci*47+12)%360})):[]).filter(i=>!q||i.n.toLowerCase().includes(q));
+  $("#grid").innerHTML=its.map(i=>{const head=`<span class="cl">${esc(i.cn)}</span><h4>${esc(i.n)}</h4>${i.combo&&i.d?`<small style="display:block;opacity:.7;font-size:11px;line-height:1.3">${esc(i.d)}</small>`:""}`;
+    if(i.ag)return`<div class="it ag" style="--h:${i.h}">${head}<span class="tag">Agotado</span></div>`;
+    const ex=i.g&&i.g.length?`<button class="xb" data-x="${esc(i.k)}">+ Extras</button>`:"";
+    if(i.v)return`<div class="it" style="--h:${i.h}">${head}<div class="vs">${i.v.map((v,y)=>`<button data-a="${esc(i.k)}|${y}"><span>${esc(v[0])}</span><b>${cop(v[1])}</b></button>`).join("")}${ex}</div></div>`;
+    return`<div class="it tap" style="--h:${i.h}" data-a="${esc(i.k)}|-1">${head}<div class="pr"><span>${cop(i.p)}</span><span class="plus">+</span></div>${ex}</div>`}).join("")||'<div class="empty">Sin resultados.</div>';
+  $("#grid").onclick=e=>{const x=e.target.closest("[data-x]");if(x){e.stopPropagation();extras(x.dataset.x);return}const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,i=a.lastIndexOf("|");add(a.slice(0,i),+a.slice(i+1))}}
+function pushLine(it,v,mods,notas){
+  const base=v?v[1]:it.p,p=base+mods.reduce((t,m)=>t+m.p,0),key=(it.combo?"c:":"")+it.id+"|"+(v?v[0]:"")+"|"+mods.map(m=>m.id).sort().join(",")+"|"+(notas||""),l=cart.find(x=>x.key===key);
+  if(l){if(l.q<99)l.q++}else cart.push({key,id:it.id,n:it.n,v:v?v[0]:"",p,q:1,mods,notas:notas||"",combo:!!it.combo,d:it.combo?it.d:""});drawCart()}
+function add(k,y){const it=MENU.flatMap(c=>c.items).find(i=>i.k===k);if(!it||it.ag)return;
+  if((it.g||[]).some(g=>g.min>0)){extras(k,y);return}
+  pushLine(it,y>=0?it.v[y]:null,[],"")}
+function extras(k,y0){const it=MENU.flatMap(c=>c.items).find(i=>i.k===k);if(!it||it.ag)return;
+  const vsel=y0>=0?y0:0;
+  modal(`<h3>${esc(it.n)}</h3>${it.v?`<label>Opción</label><div class="row">${it.v.map((v,y)=>`<label style="flex:1;display:flex;gap:6px;align-items:center"><input type="radio" name="xv" value="${y}" ${y===vsel?"checked":""}> ${esc(v[0])} · ${cop(v[1])}</label>`).join("")}</div>`:""}
+  ${(it.g||[]).map((g,gi)=>`<label>${esc(g.n)}${g.min>0?" (obligatorio)":""}${g.max?` · máx ${g.max}`:""}</label>${g.m.map(m=>`<label style="display:flex;gap:8px;align-items:center;padding:6px 0;${m.ag?"opacity:.45":""}"><input type="checkbox" data-g="${gi}" value="${esc(m.id)}" ${m.ag?"disabled":""}> <span style="flex:1">${esc(m.n)}${m.ag?" (agotado)":""}</span><b>+${cop(m.p)}</b></label>`).join("")}`).join("")}
+  <label>Nota para cocina (opcional)</label><input id="xn" maxlength="200" placeholder="Sin cebolla, bien cocida…">
+  <div class="err" id="xe"></div><div class="row"><button id="xc">Cancelar</button><button class="ok" id="xo" style="flex:2">Agregar</button></div>`);
+  $("#xc").onclick=cerrarModal;
+  $("#xo").onclick=()=>{const mods=[];
+    for(let gi=0;gi<(it.g||[]).length;gi++){const g=it.g[gi],sel=[...document.querySelectorAll('#md [data-g="'+gi+'"]:checked')].map(c=>g.m.find(m=>m.id===c.value)).filter(Boolean);
+      if(sel.length<(g.min||0)){$("#xe").textContent='Elige al menos '+g.min+' en "'+g.n+'".';return}
+      if(g.max&&sel.length>g.max){$("#xe").textContent='Máximo '+g.max+' en "'+g.n+'".';return}
+      sel.forEach(m=>mods.push({id:m.id,n:m.n,p:m.p}))}
+    const r=document.querySelector('#md [name="xv"]:checked'),v=it.v?it.v[r?+r.value:0]:null;
+    const nt=$("#xn").value.trim();cerrarModal();pushLine(it,v,mods,nt)}}
+const sub=()=>cart.reduce((s,l)=>s+l.q*l.p,0);
+function drawCart(){
+  $("#cnt").textContent=cart.reduce((n,l)=>n+l.q,0)+" productos";
+  $("#tipos").innerHTML=[["local","En local"],["llevar","Para llevar"],["domicilio","Domicilio"]].map(([t,n])=>`<button data-t="${t}" class="${tipo===t?"on":""}">${n}</button>`).join("");
+  $("#tipos").onclick=e=>{const b=e.target.closest("[data-t]");if(b){tipo=b.dataset.t;drawCart()}};
+  const keep=["cn","ct","cd","cx"].map(id=>$("#"+id)?$("#"+id).value:"");
+  $("#dom").innerHTML=tipo==="local"?`<input id="cx" placeholder="Mesa / nota (opcional)">`:`<input id="cb" placeholder="🔍 Buscar cliente (nombre o teléfono)" autocomplete="off"><div id="cr"></div><input id="cn" placeholder="Nombre del cliente"><input id="ct" inputmode="tel" placeholder="Teléfono${tipo==="domicilio"?" (obligatorio)":""}">${tipo==="domicilio"?'<input id="cd" placeholder="Dirección de entrega">':""}<input id="cx" placeholder="Nota (opcional)">`;
+  ["cn","ct","cd","cx"].forEach((id,i)=>{if($("#"+id))$("#"+id).value=keep[i]});bindCli();
+  $("#lines").innerHTML=cart.map((l,i)=>`<div class="ln"><div class="nm"><b>${esc(l.n)}</b>${l.v?` <small>(${esc(l.v)})</small>`:""}${l.combo&&l.d?`<br><small>${esc(l.d)}</small>`:""}${(l.mods||[]).map(m=>`<br><small>+ ${esc(m.n)}</small>`).join("")}${l.notas?`<br><small>📝 ${esc(l.notas)}</small>`:""}<br><small>${cop(l.p)}</small></div><div class="stp"><button data-m="${i}">−</button><b>${l.q}</b><button data-p="${i}">+</button></div><span class="tt">${cop(l.q*l.p)}</span></div>`).join("")||'<div class="emp">Toca un producto para agregarlo al pedido.</div>';
+  $("#lines").onclick=e=>{const m=e.target.closest("[data-m]"),p=e.target.closest("[data-p]");
+    if(m){const l=cart[+m.dataset.m];if(--l.q<=0)cart.splice(+m.dataset.m,1);drawCart()}else if(p){const l=cart[+p.dataset.p];if(l.q<99)l.q++;drawCart()}};
+  const d=tipo==="domicilio"&&cart.length?DOM:0,ds=Math.max(0,Math.min(Math.round(+(($("#dsc")||{}).value||0)||0),sub()));
+  $("#tot").innerHTML=`<div><span>Subtotal</span><span>${cop(sub())}</span></div><div><span>Descuento ($)</span><input id="dsc" inputmode="numeric" style="width:110px;text-align:right" value="${ds||""}" placeholder="0"></div>${d?`<div><span>Domicilio</span><span>${cop(d)}</span></div>`:""}<div class="big"><span>Total</span><span>${cop(sub()-ds+d)}</span></div><div class="row" style="margin:0"><button id="vac" ${cart.length?"":"disabled"}>Vaciar</button><button class="ok" id="cob" ${cart.length?"":"disabled"} style="flex:2.4;min-height:54px;font-size:16px">Cobrar · ${cop(sub()-ds+d)}</button></div>`;
+  $("#dsc").onchange=()=>drawCart();$("#vac").onclick=()=>{cart=[];drawCart()};$("#cob").onclick=cobrarUI}
+const datos=()=>({nombre:($("#cn")||{}).value||"",telefono:($("#ct")||{}).value||"",direccion:($("#cd")||{}).value||"",notas:($("#cx")||{}).value||""});
+const calc=()=>{const ds=Math.max(0,Math.min(Math.round(+(($("#dsc")||{}).value||0)||0),sub())),d=tipo==="domicilio"?DOM:0;return{ds,d,t:sub()-ds+d}};
+/* ---------- clientes ---------- */
+function bindCli(){const b=$("#cb");if(b)b.oninput=()=>{clearTimeout(cliT);const t=b.value.trim();if(t.length<2){cliRes=[];drawCli();return}
+  cliT=setTimeout(async()=>{try{cliRes=(await rpc("customer_buscar",{p_q:t}))||[]}catch(_){cliRes=[]}drawCli()},300)};drawCli()}
+function aplicarDir(d){if(!d||!$("#cd"))return;$("#cd").value=d.direccion||"";if(d.referencia&&$("#cx")&&!$("#cx").value)$("#cx").value="Ref: "+d.referencia}
+function drawCli(){const r=$("#cr");if(!r)return;let h="";
+  if(cli)h+=`<div style="background:var(--p2);border:1px solid var(--l);border-radius:12px;padding:8px 10px;margin:6px 0"><div><b style="color:var(--g)">✓ ${esc(cli.nombre)}</b> <small style="color:var(--m)">· ${esc(cli.pedidos)} pedidos</small></div>${tipo==="domicilio"&&(cli.direcciones||[]).length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0">${cli.direcciones.map((a,i)=>`<button data-ca="${i}" style="min-height:36px;font-size:13px;padding:4px 10px">${esc(a.etiqueta||"Dirección")}: ${esc(a.direccion)}</button>`).join("")}</div>`:""}<div class="row" style="margin:6px 0 0"><button data-ch="1" style="min-height:36px">Historial</button><button data-cq="1" style="min-height:36px">Quitar</button></div></div>`;
+  h+=cliRes.map((c,i)=>`<button data-cp="${i}" style="width:100%;text-align:left;margin:3px 0;min-height:44px">${esc(c.nombre)} · ${esc(c.telefono)} <small style="color:var(--m)">(${esc(c.pedidos)} pedidos)</small></button>`).join("");
+  r.innerHTML=h;
+  r.onclick=e=>{const p=e.target.closest("[data-cp]"),a=e.target.closest("[data-ca]"),hh=e.target.closest("[data-ch]"),qq=e.target.closest("[data-cq]");
+    if(p){cli=cliRes[+p.dataset.cp];cliRes=[];$("#cb").value="";$("#cn").value=cli.nombre||"";$("#ct").value=cli.telefono||"";if(tipo==="domicilio")aplicarDir((cli.direcciones||[])[0]);drawCli()}
+    else if(a&&cli)aplicarDir(cli.direcciones[+a.dataset.ca]);
+    else if(qq){cli=null;drawCli()}
+    else if(hh&&cli)historial(cli.id)}}
+async function historial(id){try{const h=await rpc("customer_historial",{p_customer:id}),r=h.resumen||{},c=h.cliente||{};
+  modal(`<h3>${esc(c.nombre)}</h3><p style="color:var(--m)">📞 ${esc(c.telefono)}${c.notas?" · "+esc(c.notas):""}</p><div class="sum"><div><span>Pedidos</span><b>${esc(r.pedidos||0)}</b></div><div><span>Gastado</span><b>${cop(r.gastado||0)}</b></div><div><span>Ticket promedio</span><b>${cop(r.ticket||0)}</b></div></div><h4>Últimos pedidos</h4>${(h.pedidos||[]).map(p=>`<div style="padding:8px 0;border-top:1px solid var(--l);font-size:14px"><b>#${esc(p.numero)}</b> · ${esc(new Date(p.created_at).toLocaleDateString("es-CO",{timeZone:"America/Bogota"}))} · ${esc(p.estado)} · ${cop(p.total||0)}<br><small style="color:var(--m)">${esc(p.items||"")}</small></div>`).join("")||"<p>Sin pedidos.</p>"}<button style="width:100%;margin-top:10px" id="hx">Cerrar</button>`);$("#hx").onclick=cerrarModal}catch(e){alert(e.message)}}
+/* ---------- cobro ---------- */
+let pay=[];
+function cobrarUI(){const{t}=calc();if(tipo==="domicilio"){const x=datos();if(!x.direccion.trim()||!x.telefono.trim()){alert("El domicilio necesita teléfono y dirección.");return}}
+  pay=[{m:"efectivo",a:t}];drawPay()}
+function drawPay(){const{ds,d,t}=calc(),paid=pay.reduce((s,r)=>s+(+r.a||0),0),falta=t-paid,ef=pay.filter(r=>r.m==="efectivo").reduce((s,r)=>s+(+r.a||0),0),rec=+(($("#rec")||{}).value||0)||0;
+  modal(`<h3>Cobrar ${cop(t)}</h3><div class="row">${["efectivo","tarjeta","transferencia"].map(m=>`<button data-all="${m}">Todo ${m}</button>`).join("")}</div>
+  ${pay.map((r,i)=>`<div class="row"><select data-pm="${i}">${["efectivo","tarjeta","transferencia"].map(m=>`<option ${r.m===m?"selected":""}>${m}</option>`).join("")}</select><input data-pa="${i}" inputmode="numeric" value="${r.a}"><button class="s" data-pd="${i}">✕</button></div>`).join("")}
+  <button id="addp" style="width:100%;margin:6px 0">+ Dividir pago</button>
+  ${ef>0?`<label>Efectivo recibido (para el cambio)</label><input id="rec" inputmode="numeric" value="${rec||""}">${rec>=ef?`<div class="sum"><div><b>Cambio</b><b>${cop(rec-ef)}</b></div></div>`:""}`:""}
+  <div class="err" id="pe">${falta?`Falta ${cop(falta)}`:""}</div>
+  <div class="row"><button id="cx2">Cancelar</button><button class="ok" id="okp" ${falta?"disabled":""} style="flex:2">Confirmar venta</button></div>`);
+  const M=$("#md");
+  M.onclick=e=>{const b=e.target;if(b.dataset.all){pay=[{m:b.dataset.all,a:t}];drawPay()}else if(b.dataset.pd){pay.splice(+b.dataset.pd,1);if(!pay.length)pay=[{m:"efectivo",a:t}];drawPay()}};
+  M.querySelectorAll("[data-pm]").forEach(s=>s.onchange=()=>{pay[+s.dataset.pm].m=s.value;drawPay()});
+  M.querySelectorAll("[data-pa]").forEach(i=>i.onchange=()=>{pay[+i.dataset.pa].a=+i.value||0;drawPay()});
+  $("#addp").onclick=()=>{pay.push({m:"tarjeta",a:Math.max(falta,0)});drawPay()};if($("#rec"))$("#rec").onchange=drawPay;
+  $("#cx2").onclick=cerrarModal;$("#okp").onclick=()=>vender(ds,d,t)}
+async function vender(ds,d,t){const b=$("#okp");b.disabled=true;b.textContent="Guardando…";const x=datos();
+  const items=cart.map(l=>l.combo?{combo:l.id,cantidad:l.q,precio:l.p}:({producto:l.id,variante:l.v||null,cantidad:l.q,precio:l.p,modificadores:(l.mods||[]).map(m=>m.id),notas:l.notas||null})),snap=cart.map(l=>({...l}));
+  try{const r=await rpc("pos_sale",{p:{tipo,nombre:x.nombre,telefono:x.telefono,direccion:x.direccion,notas:x.notas,domicilio:d,descuento:ds,items,pagos:pay.map(p=>({metodo:p.m,monto:+p.a}))}});
+    const rec=+(($("#rec")||{}).value||0)||0,ef=pay.filter(p=>p.m==="efectivo").reduce((s,p)=>s+(+p.a||0),0);
+    const R={num:r.numero,tipo,x,snap,sub:sub(),ds,d,t,pay:pay.map(p=>({...p})),cambio:rec>ef?rec-ef:0};
+    cart=[];cli=null;cliRes=[];caja=await rpc("cash_summary");shell();recibo(R)}
+  catch(e){b.disabled=false;b.textContent="Confirmar venta";$("#pe").textContent=e.message}}
+function recibo(R){const f=new Date().toLocaleString("es-CO",{timeZone:"America/Bogota"}),T={local:"En local",llevar:"Para llevar",domicilio:"Domicilio"}[R.tipo];
+  const h=`<div style="text-align:center"><b>${NOMBRE}</b><br>Pedido #${R.num}<br>${esc(f)}<br>${T}</div><hr>${R.x.nombre?`Cliente: ${esc(R.x.nombre)}<br>`:""}${R.x.telefono?`Tel: ${esc(R.x.telefono)}<br>`:""}${R.x.direccion?`Dir: ${esc(R.x.direccion)}<br>`:""}<hr>`+
+   R.snap.map(l=>`<div class="r"><span>${l.q}x ${esc(l.n)}${l.v?" ("+esc(l.v)+")":""}${(l.mods||[]).map(m=>"<br>&nbsp;&nbsp;+ "+esc(m.n)).join("")}</span><span>${cop(l.q*l.p)}</span></div>`).join("")+`<hr><div class="r"><span>Subtotal</span><span>${cop(R.sub)}</span></div>${R.ds?`<div class="r"><span>Descuento</span><span>-${cop(R.ds)}</span></div>`:""}${R.d?`<div class="r"><span>Domicilio</span><span>${cop(R.d)}</span></div>`:""}<div class="r"><b>TOTAL</b><b>${cop(R.t)}</b></div><hr>`+
+   R.pay.map(p=>`<div class="r"><span>${esc(p.m)}</span><span>${cop(p.a)}</span></div>`).join("")+(R.cambio?`<div class="r"><span>Cambio</span><span>${cop(R.cambio)}</span></div>`:"")+`<hr><div style="text-align:center">¡Gracias por tu compra!</div>`;
+  $("#rcpt").innerHTML=h;
+  modal(`<h3 style="color:var(--g)">✓ Venta #${R.num} registrada</h3><p style="color:var(--m)">Total ${cop(R.t)}${R.cambio?` · Cambio ${cop(R.cambio)}`:""}</p><p style="color:var(--g);margin:0 0 12px;font-size:14px">● Enviado a cocina</p><div class="row"><button class="pri" id="imp">Imprimir recibo</button><button id="nv">Nueva venta</button></div>`);
+  $("#imp").onclick=()=>window.print();$("#nv").onclick=cerrarModal}
+/* ---------- pedidos web: cobrar y confirmar / cancelar ---------- */
+let PED=[],pedPrev=0,pedT=null,wpay=[],wsel=null;
+function beep(){try{const a=new (window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.value=.15;o.start();setTimeout(()=>{o.stop();a.close()},250)}catch(_){}}
+async function contarPedidos(){let d;try{d=await rpc("pos_pedidos_web")}catch(_){return false}
+  PED=Array.isArray(d)?d:[];const n=$("#bpn");if(n)n.textContent=PED.length||"";
+  if(PED.length>pedPrev)beep();pedPrev=PED.length;return true}
+function pollPedidos(){if(pedT)clearInterval(pedT);pedPrev=0;contarPedidos();pedT=setInterval(()=>{if(!$("#bpn")){clearInterval(pedT);pedT=null;return}contarPedidos()},15000)}
+const TW={domicilio:"Domicilio",llevar:"Recoger"};
+function hora(t){return new Date(t).toLocaleTimeString("es-CO",{timeZone:"America/Bogota",hour:"2-digit",minute:"2-digit"})}
+function itemsHtml(o){return (o.items||[]).map(i=>`<li>${esc(i.cantidad)}x ${esc(i.nombre)}${i.variante?" ("+esc(i.variante)+")":""}${(Array.isArray(i.modificadores)?i.modificadores:[]).map(m=>"<br><small>+ "+esc(m&&m.nombre||"")+"</small>").join("")}${i.notas?"<br><small>"+esc(i.notas)+"</small>":""}</li>`).join("")}
+async function pedidosUI(){await contarPedidos();
+  modal(`<h3>Pedidos web por cobrar</h3>${PED.length?PED.map(o=>`<div class="pw"><h4>#${esc(o.numero)} · ${esc(o.cliente)} · ${esc(TW[o.tipo]||o.tipo)}</h4><small>${esc(hora(o.created_at))} · 📞 ${esc(o.telefono||"")}${o.pago_previsto?" · Pago: "+esc(o.pago_previsto):""}</small>${o.direccion?`<br><small>📍 ${esc(o.direccion)}</small>`:""}${o.notas?`<br><small>📝 ${esc(o.notas)}</small>`:""}<ul>${itemsHtml(o)}</ul><div class="row" style="align-items:center"><b style="flex:1">${cop(o.total)}${o.costo_domicilio?` <small>(incl. domicilio ${cop(o.costo_domicilio)})</small>`:""}</b><button data-wc="${esc(o.id)}" class="ok">Cobrar y confirmar</button><button data-wx="${esc(o.id)}" class="s" style="flex:0 0 auto">Cancelar</button></div></div>`).join(""):'<div class="emp">No hay pedidos web pendientes.</div>'}<div class="row"><button id="wcl">Cerrar</button></div>`);
+  $("#wcl").onclick=cerrarModal;
+  $("#md").onclick=e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.wc)cobrarWeb(b.dataset.wc);else if(b.dataset.wx)cancelarWeb(b.dataset.wx)}}
+function cobrarWeb(id){wsel=PED.find(o=>o.id===id);if(!wsel)return;const pv=String(wsel.pago_previsto||"").toLowerCase();wpay=[{m:["efectivo","tarjeta","transferencia"].includes(pv)?pv:"efectivo",a:wsel.total,r:""}];drawWPay()}
+function drawWPay(){const o=wsel,paid=wpay.reduce((s,r)=>s+(+r.a||0),0),falta=o.total-paid;
+  modal(`<h3>Cobrar pedido #${esc(o.numero)} · ${cop(o.total)}</h3><p style="color:var(--m);margin:0 0 8px">${esc(o.cliente)}</p><div class="row">${["efectivo","tarjeta","transferencia"].map(m=>`<button data-all="${m}">Todo ${m}</button>`).join("")}</div>
+  ${wpay.map((r,i)=>`<div class="row"><select data-pm="${i}">${["efectivo","tarjeta","transferencia"].map(m=>`<option ${r.m===m?"selected":""}>${m}</option>`).join("")}</select><input data-pa="${i}" inputmode="numeric" value="${esc(r.a)}"><button class="s" data-pd="${i}">✕</button></div>${r.m==="transferencia"?`<input data-pr="${i}" placeholder="Referencia de la transferencia (opcional)" value="${esc(r.r||"")}" maxlength="100">`:""}`).join("")}
+  <button id="addp" style="width:100%;margin:6px 0">+ Dividir pago</button>
+  <div class="err" id="pe">${falta?(falta>0?`Falta ${cop(falta)}`:`Sobran ${cop(-falta)}`):""}</div>
+  <div class="row"><button id="wvo">Volver</button><button class="ok" id="wok" ${falta?"disabled":""} style="flex:2">Confirmar cobro</button></div>`);
+  const M=$("#md");
+  M.onclick=e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.all){wpay=[{m:b.dataset.all,a:o.total,r:""}];drawWPay()}else if(b.dataset.pd){wpay.splice(+b.dataset.pd,1);if(!wpay.length)wpay=[{m:"efectivo",a:o.total,r:""}];drawWPay()}};
+  M.querySelectorAll("[data-pm]").forEach(x=>x.onchange=()=>{wpay[+x.dataset.pm].m=x.value;setTimeout(drawWPay,0)});
+  M.querySelectorAll("[data-pa]").forEach(x=>x.onchange=()=>{wpay[+x.dataset.pa].a=Math.round(+String(x.value).replace(/\D/g,""))||0;setTimeout(drawWPay,0)});
+  M.querySelectorAll("[data-pr]").forEach(x=>x.oninput=()=>{wpay[+x.dataset.pr].r=x.value});
+  $("#addp").onclick=()=>{wpay.push({m:"tarjeta",a:Math.max(falta,0),r:""});drawWPay()};
+  $("#wvo").onclick=pedidosUI;$("#wok").onclick=()=>enviarCobro()}
+async function enviarCobro(){const o=wsel,b=$("#wok");b.disabled=true;b.textContent="Guardando…";
+  try{const r=await rpc("order_cobrar",{p_order:o.id,p_pagos:wpay.map(p=>({metodo:p.m,monto:+p.a,ref:p.r||null}))});
+    caja=await rpc("cash_summary");PED=PED.filter(x=>x.id!==o.id);pedPrev=PED.length;const n=$("#bpn");if(n)n.textContent=PED.length||"";
+    recibo({num:r.numero,tipo:o.tipo,x:{nombre:o.cliente,telefono:o.telefono||"",direccion:o.direccion||""},
+      snap:(o.items||[]).map(i=>({q:i.cantidad,n:i.nombre,v:i.variante,mods:(Array.isArray(i.modificadores)?i.modificadores:[]).map(m=>({n:m&&m.nombre||""})),p:Math.round(i.subtotal/i.cantidad)})),
+      sub:o.subtotal,ds:0,d:o.costo_domicilio||0,t:o.total,pay:wpay.map(p=>({...p})),cambio:0})}
+  catch(e){b.disabled=false;b.textContent="Confirmar cobro";$("#pe").textContent=e.message}}
+function cancelarWeb(id){const o=PED.find(x=>x.id===id);if(!o)return;
+  modal(`<h3>Cancelar pedido #${esc(o.numero)}</h3><p style="color:var(--m)">${esc(o.cliente)} · ${cop(o.total)}</p><label>Motivo (obligatorio)</label><input id="wmot" maxlength="200" placeholder="Ej: el cliente no pagó"><div class="err" id="pe"></div><div class="row"><button id="wvo">Volver</button><button id="wno" style="flex:2;border-color:var(--r);color:var(--r)">Cancelar pedido</button></div>`);
+  $("#md").onclick=null;$("#wvo").onclick=pedidosUI;
+  $("#wno").onclick=async()=>{const m=$("#wmot").value.trim();if(m.length<3){$("#pe").textContent="Escribe el motivo (mínimo 3 letras).";return}
+    const b=$("#wno");b.disabled=true;try{await rpc("order_cancelar",{p_order:o.id,p_motivo:m});await pedidosUI()}catch(e){b.disabled=false;$("#pe").textContent=e.message}}}
+/* ---------- caja ---------- */
+function abrirCajaUI(){$("#app").innerHTML=`<div class="auth"><div class="c"><div class="brand">${LOGO}<div><b>Jaguar POS</b><small>Burger &amp; Grill</small></div></div><h2>Abrir caja</h2><p class="sub">Cuenta el efectivo con el que empieza el turno.</p><label>Efectivo inicial</label><input id="ini" inputmode="numeric" placeholder="0"><div class="err" id="er"></div><button class="pri" style="width:100%" id="ab">Abrir caja</button><button class="ghost" style="width:100%;margin-top:10px" id="so">Salir</button></div></div>`;
+  $("#so").onclick=()=>salir();$("#ab").onclick=async()=>{try{await rpc("open_cash",{p_opening:Math.round(+$("#ini").value.replace(/\D/g,""))||0});caja=await rpc("cash_summary");shell()}catch(e){$("#er").textContent=e.message}}}
+function cajaUI(){const c=caja,v=c.ventas||{},tv=Object.values(v).reduce((a,b)=>a+b,0);
+  modal(`<h3>Caja</h3><div class="sum"><div><span>Abierta</span><span>${new Date(c.abierta).toLocaleString("es-CO",{timeZone:"America/Bogota"})}</span></div><div><span>Efectivo inicial</span><span>${cop(c.inicial)}</span></div>
+  ${["efectivo","tarjeta","transferencia"].map(m=>`<div><span>Ventas ${m}</span><span>${cop(v[m]||0)}</span></div>`).join("")}<div><span>Ventas totales</span><b>${cop(tv)}</b></div>
+  <div><span>Entradas</span><span>${cop(c.entradas)}</span></div><div><span>Retiros</span><span>-${cop(c.retiros)}</span></div><div><span>Gastos</span><span>-${cop(c.gastos)}</span></div><div><span>Devoluciones</span><span>-${cop(c.devoluciones)}</span></div><div><b>Efectivo esperado</b><b>${cop(c.esperado)}</b></div></div>
+  <h4>Registrar movimiento</h4><div class="row"><select id="mk"><option value="entrada">Entrada</option><option value="retiro">Retiro</option><option value="gasto">Gasto</option><option value="devolucion">Devolución</option></select><input id="ma" inputmode="numeric" placeholder="Monto"></div><input id="mn" placeholder="Nota (opcional)"><button style="width:100%;margin-top:8px" id="mg">Guardar movimiento</button>
+  <h4>Cerrar caja</h4><input id="cc" inputmode="numeric" placeholder="Efectivo contado"><div class="err" id="pe"></div><div class="row"><button id="cx2">Volver</button><button class="pri" id="cr">Cerrar caja</button></div>`);
+  $("#cx2").onclick=cerrarModal;
+  $("#mg").onclick=async()=>{try{await rpc("cash_move",{p_kind:$("#mk").value,p_amount:Math.round(+$("#ma").value.replace(/\D/g,""))||0,p_note:$("#mn").value});caja=await rpc("cash_summary");cajaUI()}catch(e){$("#pe").textContent=e.message}};
+  $("#cr").onclick=async()=>{const n=$("#cc").value.replace(/\D/g,"");if(n===""){$("#pe").textContent="Escribe el efectivo contado.";return}
+    if(!confirm("¿Cerrar la caja? Ya no podrás vender hasta abrir otra."))return;
+    try{const r=await rpc("close_cash",{p_counted:+n});caja=null;const df=r.diferencia;
+      modal(`<h3>Caja cerrada</h3><div class="sum"><div><span>Esperado</span><span>${cop(r.esperado)}</span></div><div><span>Contado</span><span>${cop(r.contado)}</span></div><div><b>Diferencia</b><b style="color:${df?"var(--r)":"var(--g)"}">${df>0?"+":""}${cop(df)}</b></div></div><button class="pri" style="width:100%;margin-top:12px" id="fin">Listo</button>`);
+      $("#fin").onclick=()=>{cerrarModal();shell()}}catch(e){$("#pe").textContent=e.message}}}
+function modal(h){$("#md").onclick=null;$("#md").innerHTML=`<div class="md"><div>${h}</div></div>`}
+function cerrarModal(){$("#md").innerHTML=""}
+start();
+</script></body></html>
